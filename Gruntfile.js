@@ -27,6 +27,7 @@ module.exports = function(grunt) {
 				src : [
 					'node_modules/underscore/underscore-min.js',
 					'node_modules/backbone/backbone-min.js',
+					'node_modules/backbone.localstorage/backbone.localStorage-min.js',
 					'dev/src/libs/*.js'
 				],
 				dest: 'build/js/libs/libs.js'
