@@ -2,135 +2,161 @@
 
 module.exports = function(grunt) {
 
-  var pkg = grunt.file.readJSON('package.json');
+	var pkg = grunt.file.readJSON('package.json');
 
-  // Project configuration.
-  var configOptions = {
+	// Project configuration.
+	var configOptions = {
 
-    pkg: pkg,
-    
-    concat: {
-      dist: {
-        src: [
-          'dev/src/App.js', 
-          'dev/src/app/controllers/*.js', 
-          'dev/src/app/Router.js', 
-          'dev/src/app/models/*.js', 
-          'dev/src/app/collections/*.js', 
-          'dev/src/app/views/Base.js',
-          'dev/src/app/views/**/*.js',
-          'dev/src/utils/*.js'
-        ],
-        dest: 'build/js/<%= pkg.namespace %>.js'
-      },
-      libs : {
-        src : [
-          'node_modules/underscore/underscore-min.js',
-          'node_modules/backbone/backbone-min.js',
-          'dev/src/libs/*.js'
-        ],
-        dest: 'build/js/libs/libs.js'
-      }
-    },
-    
-    uglify: {
-      dist: {
-        src: '<%= concat.dist.dest %>',
-        dest: 'build/js/<%= pkg.namespace %>.min.js'
-      },
-      libs: {
-        src: '<%= concat.libs.dest %>',
-        dest: 'build/js/libs/libs.min.js'
-      }
-    },
+		pkg: pkg,
+		
+		concat: {
+			dist: {
+				src: [
+					'dev/src/App.js', 
+					'dev/src/app/controllers/*.js', 
+					'dev/src/app/Router.js', 
+					'dev/src/app/models/*.js', 
+					'dev/src/app/collections/*.js', 
+					'dev/src/app/views/Base.js',
+					'dev/src/app/views/**/*.js',
+					'dev/src/utils/*.js'
+				],
+				dest: 'build/js/<%= pkg.namespace %>.js'
+			},
+			libs : {
+				src : [
+					'node_modules/underscore/underscore-min.js',
+					'node_modules/backbone/backbone-min.js',
+					'dev/src/libs/*.js'
+				],
+				dest: 'build/js/libs/libs.js'
+			}
+		},
+		
+		uglify: {
+			dist: {
+				src: '<%= concat.dist.dest %>',
+				dest: 'build/js/<%= pkg.namespace %>.min.js'
+			},
+			libs: {
+				src: '<%= concat.libs.dest %>',
+				dest: 'build/js/libs/libs.min.js'
+			}
+		},
 
-    jshint: {
-      gruntfile: {
-        options: {
-          jshintrc: '.jshintrc'
-        },
-        src: 'Gruntfile.js'
-      },
-      src: {
-        options: {
-          jshintrc: '.jshintrc'
-        },
-        src: '<%= concat.dist.src %>'
-      }
-    }
-  };
+		jshint: {
+			gruntfile: {
+				options: {
+					jshintrc: '.jshintrc'
+				},
+				src: 'Gruntfile.js'
+			},
+			src: {
+				options: {
+					jshintrc: '.jshintrc'
+				},
+				src: '<%= concat.dist.dest %>'
+			}
+		},
 
-  var 
-      filesToWatch = ['dev/src/**/*.js'],
-      defaultTasks = ['jshint', 'concat'],
-      deployTasks = ['jshint', 'concat', 'uglify'];
+		copy: {
+			images: {
+				files: [
+					{ 
+						expand: true, 
+						cwd: 'dev', 
+						src: ['img/**/*'], 
+						dest: 'build'
+					}
+				],
+			}
+		}
+	};
 
-  switch ( pkg.css_preprocessor ) {
+	var 
+		filesToWatch = ['dev/src/**/*.js'],
+		defaultTasks = ['concat', 'jshint', 'copy'],
+		deployTasks = ['jshint', 'concat', 'uglify', 'copy'];
 
-    case "less" :
-      configOptions.less = {
-          dev: {
-          src: 'dev/less/style.less',
-          dest: 'build/css/style.css'
-        },
-        deploy: {
-          src: 'dev/less/style.less',
-          dest: 'build/css/style.css',
-          options: {
-            compress: true
-          }
-        }
-      };
+	switch ( pkg.css_preprocessor ) {
 
-      filesToWatch.push('dev/less/*.less');
-      defaultTasks.unshift('less:dev');
-      deployTasks.unshift('less:deploy');
-      break;
+		case "less" :
+			configOptions.less = {
+				dev: {
+					src: 'dev/less/style.less',
+					dest: 'build/css/style.css'
+				},
+				deploy: {
+					src: 'dev/less/style.less',
+					dest: 'build/css/style.css',
+					options: {
+						compress: true
+					}
+				}
+			};
 
-    case "sass" : 
-      configOptions.sass = {
-          dev: {
-          src: 'dev/sass/style.scss',
-          dest: 'build/css/style.css',
-          options: {
-            style: 'expand',
-            compass : true
-          }
-        },
-        deploy: {
-          src: 'dev/scss/style.scss',
-          dest: 'build/css/style.css'
-        }
-      };
+			filesToWatch.push('dev/less/*.less');
+			defaultTasks.unshift('less:dev');
+			deployTasks.unshift('less:deploy');
+			break;
 
-      filesToWatch.push('dev/sass/*.scss');
-      defaultTasks.unshift('sass:dev');
-      deployTasks.unshift('sass:deploy');
-      break;
-  }
+		case "sass" : 
+			configOptions.sass = {
+				dev: {
+					src: 'dev/sass/style.scss',
+					dest: 'build/css/style.css',
+					options: {
+						style: 'expand',
+						compass : true
+					}
+				},
+				deploy: {
+					src: 'dev/scss/style.scss',
+					dest: 'build/css/style.css'
+				}
+			};
 
-  configOptions.watch = {
-    gruntfile: {
-      files: '<%= jshint.gruntfile.src %>',
-      tasks: ['jshint:gruntfile']
-    },
-    test: {
-      files: filesToWatch,
-      tasks: 'default'
-    }
-  };
+			filesToWatch.push('dev/sass/*.scss');
+			defaultTasks.unshift('sass:dev');
+			deployTasks.unshift('sass:deploy');
+			break;
+	}
 
-  grunt.initConfig(configOptions);
+	configOptions.watch = {
+		gruntfile: {
+			files: '<%= jshint.gruntfile.src %>',
+			tasks: ['jshint:gruntfile']
+		},
+		test: {
+			files: filesToWatch,
+			tasks: 'default'
+		},
+		livereload: {
+			options: { 
+				livereload: true 
+			},
+			files: [
+				'build/img/**/*.{png,jpg,jpeg,gif,webp,svg}',
+				'<%= sass.dev.dest %>', 
+				'<%= concat.dist.dest =>', 
+				'<%= concat.libs.dest =>', 
+				'build/**/*.html', 
+			]
+		}
+	};
 
-  // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-sass');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.initConfig(configOptions);
 
-  // Default task.
-  grunt.registerTask('default', defaultTasks);
-  grunt.registerTask('deploy', deployTasks);
+	// These plugins provide necessary tasks.
+	grunt.loadNpmTasks('grunt-contrib-sass');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-copy');
+
+	// Default task.
+	grunt.registerTask('default', defaultTasks);
+	grunt.registerTask('deploy', deployTasks);
 
 };
